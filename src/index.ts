@@ -1,8 +1,12 @@
-import { Elysia, t } from "elysia";
+import { Elysia } from "elysia";
 import { swagger } from "@elysiajs/swagger";
 import { cors } from "@elysiajs/cors";
-import { db } from "./db";
-import { DiseaseController } from "./controllers/disease";
+import {
+  DiseasesController,
+  UsersController,
+  HospitalsController,
+} from "./controllers";
+import { client } from "./db";
 
 // const kernel = new Kernel({
 //   bundles: [
@@ -32,35 +36,21 @@ import { DiseaseController } from "./controllers/disease";
 // });
 
 const app = new Elysia()
-  .use(swagger())
-  // .use(
-  //   swagger({
-  //     documentation: {
-  //       info: {
-  //         title: "Elysia Documentation",
-  //         version: "1.0.0",
-  //       },
-  //     },
-  //   })
-  // )
-
-  // .post("/sign-in", ({ body }) => body, {
-  //   body: t.Object(
-  //     {
-  //       username: t.String(),
-  //       password: t.String(),
-  //     },
-  //     {
-  //       description: "Expected an username and password",
-  //     }
-  //   ),
-  //   detail: {
-  //     summary: "Sign in the user",
-  //     tags: ["authentication"],
-  //   },
-  // })
+  .use(
+    swagger({
+      documentation: {
+        info: {
+          title: "Healthcare API Documentation",
+          version: "1.0.0",
+        },
+      },
+    })
+  )
   .use(cors())
-  .use(DiseaseController)
+  .use(DiseasesController)
+  .use(UsersController)
+  .use(HospitalsController)
+  .onStop(() => client.close())
   .listen(8080);
 
 console.log(
