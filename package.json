@@ -1,0 +1,21 @@
+{
+  "name": "health-service-api",
+  "version": "1.0.50",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "bun run --watch src/index.ts"
+  },
+  "dependencies": {
+    "@bluelibs/nova": "^1.5.0",
+    "@elysiajs/bearer": "^0.6.0",
+    "@elysiajs/cors": "^0.6.0",
+    "@elysiajs/jwt": "^0.6.4",
+    "@elysiajs/swagger": "^0.6.2",
+    "elysia": "latest",
+    "mongodb": "^6.1.0"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
+  },
+  "module": "src/index.js"
+}
