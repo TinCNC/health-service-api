@@ -5,6 +5,7 @@ import {
   DiseasesController,
   UsersController,
   HospitalsController,
+  DoctorsController,
 } from "./controllers";
 import { client } from "./db";
 
@@ -46,9 +47,11 @@ const app = new Elysia()
       },
     })
   )
+  .get("/", () => "Hi")
   .use(cors())
   .use(DiseasesController)
   .use(UsersController)
+  .use(DoctorsController)
   .use(HospitalsController)
   .onStop(() => client.close())
   .listen(8080);

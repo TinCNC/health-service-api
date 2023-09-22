@@ -6,16 +6,17 @@
     "dev": "bun run --watch src/index.ts"
   },
   "dependencies": {
-    "@bluelibs/nova": "^1.5.0",
+    "@bluelibs/nova": "^1.6.0",
     "@elysiajs/bearer": "^0.6.0",
     "@elysiajs/cors": "^0.6.0",
     "@elysiajs/jwt": "^0.6.4",
-    "@elysiajs/swagger": "^0.6.2",
+    "@elysiajs/swagger": "^0.7.2",
     "elysia": "latest",
     "mongodb": "^6.1.0"
   },
   "devDependencies": {
-    "bun-types": "latest"
+    "bun-types": "latest",
+    "prisma": "^5.3.1"
   },
   "module": "src/index.js"
 }
