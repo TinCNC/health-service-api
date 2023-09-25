@@ -5,12 +5,12 @@ const UserInfo = {
   first_name: t.String(),
   last_name: t.String(),
   gender: t.String(),
-  dob: t.Any(),
+  dob: t.String(),
   home_address: t.String(),
   avatar: t.Optional(t.String()),
 };
 
-const UserSchema = {
+export const CreateUserDTO = t.Object({
   username: t.String(),
   email: t.String({
     pattern: emailValidation,
@@ -19,20 +19,17 @@ const UserSchema = {
   password: t.String(),
   phone: t.String(),
   info: t.Object(UserInfo),
-};
-
-const CreatedAt = {
-  created_at: t.Optional(t.Date()),
-};
-
-const UpdatedAt = {
-  updated_at: t.Optional(t.Date()),
-};
-
-export const CreateUserDTO = t.Object({
-  ...UserSchema,
-  ...CreatedAt,
-  ...UpdatedAt,
 });
 
-export const UpdateUserDTO = t.Object({ ...UserSchema, ...UpdatedAt });
+export const UpdateUserDTO = t.Object({
+  username: t.Optional(t.String()),
+  email: t.Optional(
+    t.String({
+      pattern: emailValidation,
+      default: "dpcongdanh@gmail.com",
+    })
+  ),
+  password: t.Optional(t.String()),
+  phone: t.Optional(t.String()),
+  info: t.Optional(t.Object(UserInfo)),
+});

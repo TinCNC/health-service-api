@@ -24,7 +24,7 @@ const WorkHistory = {
   end_date: t.Any(),
 };
 
-export const CreateDoctorDTO = t.Object({
+export const CreatePatientDTO = t.Object({
   npi: t.String(),
   user_id: t.Any(),
   speciality: t.String(),
@@ -34,7 +34,7 @@ export const CreateDoctorDTO = t.Object({
   certificates: t.Array(t.Object(CertificateInfo)),
 });
 
-export const UpdateDoctorDTO = t.Object({
+export const UpdatePatientDTO = t.Object({
   npi: t.String(),
   user_id: t.Any(),
   speciality: t.String(),

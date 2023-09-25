@@ -9,7 +9,11 @@ import { cors } from "@elysiajs/cors";
 // } from "./controllers";
 
 import { PrismaClient } from "@prisma/client";
-import { DiseasesController } from "./controllers";
+import {
+  DiseasesController,
+  UsersController,
+  HospitalsController,
+} from "./controllers";
 
 const prisma = new PrismaClient();
 
@@ -29,13 +33,13 @@ const app = new Elysia()
   .use(cors())
   .onStop(() => prisma.$disconnect())
   .use(DiseasesController(prisma))
-  // .use(DiseasesController)
-  // .use(UsersController)
+  .use(UsersController(prisma))
   // .use(DoctorsController)
-  // .use(HospitalsController)
+  .use(HospitalsController(prisma))
   // .onStop(() => client.close())
   .listen(8080);
 
 console.log(
-  `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
+  `🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}
+  Swagger UI: http://${app.server?.hostname}:${app.server?.port}/swagger`
 );

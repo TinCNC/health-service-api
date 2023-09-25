@@ -21,28 +21,23 @@ const Location = {
   coordinates: t.Array(t.Number(), { minItems: 2, maxItems: 2 }),
 };
 
-const HospitalSchema = {
+export const CreateHospitalDTO = t.Object({
   name: t.String(),
   location: t.Object(Location),
   director: t.Any(),
   gallery: t.Array(t.Object(Gallery)),
+  // gallery: t.Any(),
   capacity: t.Integer({ minimum: 1 }),
   phone: t.String(),
   contact_info: t.Optional(t.Object(ContactInfo)),
-};
-
-const CreatedAt = {
-  created_at: t.Optional(t.Date()),
-};
-
-const UpdatedAt = {
-  updated_at: t.Optional(t.Date()),
-};
-
-export const CreateHospitalDTO = t.Object({
-  ...HospitalSchema,
-  ...CreatedAt,
-  ...UpdatedAt,
 });
 
-export const UpdateHospitalDTO = t.Object({ ...HospitalSchema, ...UpdatedAt });
+export const UpdateHospitalDTO = t.Object({
+  name: t.Optional(t.String()),
+  location: t.Optional(t.Object(Location)),
+  director: t.Optional(t.Any()),
+  gallery: t.Optional(t.Array(t.Object(Gallery))),
+  capacity: t.Optional(t.Integer({ minimum: 1 })),
+  phone: t.Optional(t.String()),
+  contact_info: t.Optional(t.Object(ContactInfo)),
+});

@@ -22,3 +22,113 @@ model diseases {
 
   // @@map("diseases")
 }
+
+type UserInfo {
+  first_name   String
+  last_name    String
+  gender       String
+  dob          DateTime
+  home_address String
+  avatar       String?
+}
+
+model users {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  username   String   @unique
+  email      String
+  password   String
+  phone      String
+  info       UserInfo
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  hospitals hospitals[]
+
+  // @@map("users")
+}
+
+type ContactInfo {
+  website String? @default("https://examplewebsite.com")
+  phone   String? @default("0938656495")
+  email   String? @default("123abc@abc.com")
+  address String?
+}
+
+// model Gallery {
+//   id          String     @id @default(auto()) @map("_id") @db.ObjectId
+//   name        String
+//   description String?
+//   file        String
+//   doctors     doctors?   @relation(fields: [doctorsId], references: [id])
+//   doctorsId   String?    @db.ObjectId
+//   hospitals   hospitals? @relation(fields: [hospitalsId], references: [id])
+//   hospitalsId String?    @db.ObjectId
+// }
+
+type Gallery {
+  name        String
+  description String?
+  file        String
+}
+
+type Location {
+  type        String
+  coordinates Float[]
+}
+
+model hospitals {
+  id           String       @id @default(auto()) @map("_id") @db.ObjectId
+  name         String       @unique
+  location     Location
+  director     String       @db.ObjectId
+  gallery      Gallery[]
+  capacity     Int
+  contact_info ContactInfo?
+  created_at   DateTime     @default(now())
+  updated_at   DateTime     @updatedAt
+
+  director_info users?        @relation(fields: [director], references: [id])
+  // @@map("hospitals")
+  WorkHistory   WorkHistory[]
+}
+
+model WorkHistory {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  hospital    hospitals @relation(fields: [hospitalsId], references: [id])
+  salary      Float
+  file        String
+  start_date  DateTime
+  end_date    DateTime
+  hospitalsId String    @db.ObjectId
+  doctors     doctors?  @relation(fields: [doctorsId], references: [id])
+  doctorsId   String?   @db.ObjectId
+}
+
+model CertificateInfo {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  issuer      String
+  validator   String
+  program     String
+  type        String
+  image       String
+  level       Int
+  issued_date DateTime
+  end_date    DateTime
+  doctors     doctors? @relation(fields: [doctorsId], references: [id])
+  doctorsId   String?  @db.ObjectId
+}
+
+model doctors {
+  id           String            @id @default(auto()) @map("_id") @db.ObjectId
+  npi          String            @unique
+  user_id      String            @unique
+  speciality   String
+  gallery      Gallery[]
+  biography    String
+  work_history WorkHistory[]
+  certificates CertificateInfo[]
+  created_at   DateTime          @default(now())
+  updated_at   DateTime          @updatedAt
+
+  // @@map("doctors")
+}
