@@ -1,10 +1,5 @@
 import { t } from "elysia";
-
-const Gallery = {
-  name: t.String(),
-  description: t.Optional(t.String()),
-  file: t.String(),
-};
+import { Gallery } from "./submodels/gallery";
 
 const CertificateInfo = {
   issuer: t.String(),
@@ -28,18 +23,18 @@ export const CreateDoctorDTO = t.Object({
   npi: t.String(),
   user_id: t.Any(),
   speciality: t.String(),
-  gallery: t.Array(t.Object(Gallery)),
+  gallery: t.Optional(t.Array(t.Object(Gallery))),
   biography: t.String(),
-  work_history: t.Array(t.Object(WorkHistory)),
+  work_history: t.Optional(t.Array(t.Object(WorkHistory))),
   certificates: t.Array(t.Object(CertificateInfo)),
 });
 
 export const UpdateDoctorDTO = t.Object({
-  npi: t.String(),
-  user_id: t.Any(),
-  speciality: t.String(),
-  gallery: t.Array(t.Object(Gallery)),
-  biography: t.String(),
-  work_history: t.Array(t.Object(WorkHistory)),
-  certificates: t.Array(t.Object(CertificateInfo)),
+  npi: t.Optional(t.String()),
+  user_id: t.Optional(t.Any()),
+  speciality: t.Optional(t.String()),
+  gallery: t.Optional(t.Array(t.Object(Gallery))),
+  biography: t.Optional(t.String()),
+  work_history: t.Optional(t.Array(t.Object(WorkHistory))),
+  certificates: t.Optional(t.Array(t.Object(CertificateInfo))),
 });

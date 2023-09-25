@@ -1,19 +1,15 @@
 import { Elysia } from "elysia";
 import { swagger } from "@elysiajs/swagger";
 import { cors } from "@elysiajs/cors";
-// import {
-//   DiseasesController,
-//   UsersController,
-//   HospitalsController,
-//   DoctorsController,
-// } from "./controllers";
 
-import { PrismaClient } from "@prisma/client";
 import {
   DiseasesController,
   UsersController,
   HospitalsController,
+  DoctorsController,
 } from "./controllers";
+
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -34,7 +30,7 @@ const app = new Elysia()
   .onStop(() => prisma.$disconnect())
   .use(DiseasesController(prisma))
   .use(UsersController(prisma))
-  // .use(DoctorsController)
+  .use(DoctorsController(prisma))
   .use(HospitalsController(prisma))
   // .onStop(() => client.close())
   .listen(8080);

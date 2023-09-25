@@ -7,25 +7,33 @@ export const DoctorsController = (
   prisma: PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>
 ) =>
   new Elysia()
-    .get("/doctors", async () =>
-      prisma.users.findMany({
+    .get("/doctors", async () => {
+      prisma.doctors.findMany({
         select: {
           id: true,
-          username: true,
-          email: true,
-          info: true,
+          npi: true,
+          user_info: true,
+          speciality: true,
+          gallery: true,
+          biography: true,
+          work_history: true,
+          certificates: true,
           created_at: true,
           updated_at: true,
         },
-      })
-    )
+      });
+    })
     .get("/doctors/:id", ({ params: { id } }) =>
-      prisma.users.findFirst({
+      prisma.doctors.findFirst({
         select: {
           id: true,
-          username: true,
-          email: true,
-          info: true,
+          npi: true,
+          user_info: true,
+          speciality: true,
+          gallery: true,
+          biography: true,
+          work_history: true,
+          certificates: true,
           created_at: true,
           updated_at: true,
         },
@@ -37,19 +45,7 @@ export const DoctorsController = (
     .post(
       "/doctors",
       async ({ body }) => {
-        body.password = await Bun.password.hash(body.password);
-        // const dob = new Date(body.info.dob);
-
-        // if (isNaN(Date.parse(body.info.dob))) {
-        //   console.log("Invalid format");
-        // }
-
-        if (!isNaN(Date.parse(body.info.dob))) {
-          body.info.dob = new Date().toISOString();
-        }
-
-        // console.log(body.info.dob);
-        return prisma.users.create({ data: body });
+        return prisma.doctors.create({ data: body });
       },
       {
         body: CreateDoctorDTO,
@@ -58,15 +54,7 @@ export const DoctorsController = (
     .patch(
       "/doctors/:id",
       async ({ params: { id }, body }) => {
-        if (body.password !== undefined) {
-          body.password = await Bun.password.hash(body.password);
-        }
-        if (body.info !== undefined) {
-          if (!isNaN(Date.parse(body.info.dob))) {
-            body.info.dob = new Date().toISOString();
-          }
-        }
-        return prisma.users.update({
+        return prisma.doctors.update({
           where: {
             id: id,
           },

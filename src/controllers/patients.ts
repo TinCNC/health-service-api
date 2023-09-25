@@ -3,7 +3,7 @@ import { CreateUserDTO, UpdateUserDTO } from "../models";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { DefaultArgs } from "@prisma/client/runtime/library";
 
-export const UsersController = (
+export const PatientsController = (
   prisma: PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>
 ) =>
   new Elysia()

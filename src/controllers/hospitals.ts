@@ -1,5 +1,6 @@
 import { Elysia } from "elysia";
 import { CreateHospitalDTO, UpdateHospitalDTO } from "../models";
+import { ObjectId } from "bson";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { DefaultArgs } from "@prisma/client/runtime/library";
 
@@ -43,13 +44,32 @@ export const HospitalsController = (
     .post(
       "/hospitals",
       async ({ body }) => {
-        // const dob = new Date(body.info.dob);
+        if (body.gallery !== undefined) {
+          let oldIds: ObjectId[] = [];
+          body.gallery.map((item) => {
+            let newId: ObjectId = new ObjectId(item.id);
+            let idConflict = false;
+            do {
+              if (
+                newId.equals(null) ||
+                newId.equals(undefined) ||
+                newId === undefined
+              )
+                newId = new ObjectId();
+              oldIds.forEach((oldId) => {
+                if (oldId.equals(newId)) {
+                  idConflict = true;
+                  return;
+                }
+              });
+            } while (idConflict);
+            oldIds.push(newId);
+            item.id = newId;
+            item.created_at = new Date();
+            item.updated_at = new Date();
+          });
+        }
 
-        // if (isNaN(Date.parse(body.info.dob))) {
-        //   console.log("Invalid format");
-        // }
-
-        // console.log(body.info.dob);
         return prisma.hospitals.create({ data: body });
       },
       {
@@ -59,6 +79,50 @@ export const HospitalsController = (
     .patch(
       "/hospitals/:id",
       async ({ params: { id }, body }) => {
+        if (body.gallery !== undefined) {
+          // const existingGallery = (
+          //   await prisma.hospitals.findFirst({
+          //     select: {
+          //       gallery: true,
+          //     },
+          //     where: {
+          //       id: id,
+          //     },
+          //   })
+          // )?.gallery;
+
+          let oldIds: ObjectId[] = [];
+
+          // if (existingGallery !== undefined) {
+          //   oldIds.concat(
+          //     existingGallery.map((item) => new ObjectId(item.id as string))
+          //   );
+          // }
+
+          body.gallery.map((item) => {
+            let newId: ObjectId = new ObjectId(item.id);
+            let idConflict = false;
+            do {
+              if (
+                newId.equals(null) ||
+                newId.equals(undefined) ||
+                newId === undefined
+              )
+                newId = new ObjectId();
+              oldIds.forEach((oldId) => {
+                if (oldId.equals(newId)) {
+                  idConflict = true;
+                  return;
+                }
+              });
+            } while (idConflict);
+            oldIds.push(newId);
+            item.id = newId;
+            item.created_at = new Date();
+            item.updated_at = new Date();
+          });
+        }
+
         return prisma.hospitals.update({
           where: {
             id: id,

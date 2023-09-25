@@ -42,9 +42,9 @@ model users {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  hospitals hospitals[]
-
   // @@map("users")
+  hospitals hospitals[]
+  doctor    doctors?
 }
 
 type ContactInfo {
@@ -66,9 +66,12 @@ type ContactInfo {
 // }
 
 type Gallery {
+  id          String?   @db.ObjectId
   name        String
   description String?
   file        String
+  created_at  DateTime? @default(now())
+  updated_at  DateTime? @default(now())
 }
 
 type Location {
@@ -92,20 +95,42 @@ model hospitals {
   WorkHistory   WorkHistory[]
 }
 
-model WorkHistory {
-  id          String    @id @default(auto()) @map("_id") @db.ObjectId
-  hospital    hospitals @relation(fields: [hospitalsId], references: [id])
-  salary      Float
-  file        String
-  start_date  DateTime
-  end_date    DateTime
-  hospitalsId String    @db.ObjectId
-  doctors     doctors?  @relation(fields: [doctorsId], references: [id])
-  doctorsId   String?   @db.ObjectId
+// model WorkHistory {
+//   id          String    @id @default(auto()) @map("_id") @db.ObjectId
+//   hospital    hospitals @relation(fields: [hospitalsId], references: [id])
+//   salary      Float
+//   file        String
+//   start_date  DateTime
+//   end_date    DateTime
+//   hospitalsId String    @db.ObjectId
+//   doctors     doctors?  @relation(fields: [doctorsId], references: [id])
+//   doctorsId   String?   @db.ObjectId
+// }
+
+type WorkHistory {
+  id         String?  @db.ObjectId
+  hospital   String   @db.ObjectId
+  salary     Float
+  start_date DateTime
+  end_date   DateTime
 }
 
-model CertificateInfo {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+// model CertificateInfo {
+//   id          String   @id @default(auto()) @map("_id") @db.ObjectId
+//   issuer      String
+//   validator   String
+//   program     String
+//   type        String
+//   image       String
+//   level       Int
+//   issued_date DateTime
+//   end_date    DateTime
+//   doctors     doctors? @relation(fields: [doctorsId], references: [id])
+//   doctorsId   String?  @db.ObjectId
+// }
+
+type CertificateInfo {
+  id          String?   @db.ObjectId
   issuer      String
   validator   String
   program     String
@@ -113,15 +138,13 @@ model CertificateInfo {
   image       String
   level       Int
   issued_date DateTime
-  end_date    DateTime
-  doctors     doctors? @relation(fields: [doctorsId], references: [id])
-  doctorsId   String?  @db.ObjectId
+  end_date    DateTime?
 }
 
 model doctors {
   id           String            @id @default(auto()) @map("_id") @db.ObjectId
   npi          String            @unique
-  user_id      String            @unique
+  user_info    users?            @relation(fields: [user_id], references: [id])
   speciality   String
   gallery      Gallery[]
   biography    String
@@ -131,4 +154,5 @@ model doctors {
   updated_at   DateTime          @updatedAt
 
   // @@map("doctors")
+  user_id String @unique @db.ObjectId
 }

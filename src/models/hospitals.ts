@@ -1,11 +1,6 @@
 import { t } from "elysia";
+import { Gallery } from "./submodels/gallery";
 import { emailValidation } from "../regex";
-
-const Gallery = {
-  name: t.String(),
-  description: t.Optional(t.String()),
-  file: t.String(),
-};
 
 const ContactInfo = {
   website: t.Optional(t.String()),
@@ -25,10 +20,8 @@ export const CreateHospitalDTO = t.Object({
   name: t.String(),
   location: t.Object(Location),
   director: t.Any(),
-  gallery: t.Array(t.Object(Gallery)),
-  // gallery: t.Any(),
+  gallery: t.Optional(t.Array(t.Object(Gallery))),
   capacity: t.Integer({ minimum: 1 }),
-  phone: t.String(),
   contact_info: t.Optional(t.Object(ContactInfo)),
 });
 
@@ -38,6 +31,5 @@ export const UpdateHospitalDTO = t.Object({
   director: t.Optional(t.Any()),
   gallery: t.Optional(t.Array(t.Object(Gallery))),
   capacity: t.Optional(t.Integer({ minimum: 1 })),
-  phone: t.Optional(t.String()),
   contact_info: t.Optional(t.Object(ContactInfo)),
 });
