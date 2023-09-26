@@ -45,6 +45,7 @@ model users {
   // @@map("users")
   hospitals hospitals[]
   doctor    doctors?
+  patient   patients?
 }
 
 type ContactInfo {
@@ -66,12 +67,12 @@ type ContactInfo {
 // }
 
 type Gallery {
-  id          String?   @db.ObjectId
+  id          String?  @map("_id") @db.ObjectId
   name        String
   description String?
   file        String
-  created_at  DateTime? @default(now())
-  updated_at  DateTime? @default(now())
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now())
 }
 
 type Location {
@@ -91,6 +92,7 @@ model hospitals {
   updated_at    DateTime     @updatedAt
   director_info users?       @relation(fields: [director], references: [id])
   // @@map("hospitals")
+  medicines     medicines[]
 }
 
 // model WorkHistory {
@@ -106,13 +108,13 @@ model hospitals {
 // }
 
 type WorkHistory {
-  id         String?   @db.ObjectId
+  id         String?   @map("_id") @db.ObjectId
   hospital   String    @db.ObjectId
   salary     Float
   start_date DateTime
-  end_date   DateTime
-  created_at DateTime? @default(now())
-  updated_at DateTime? @default(now())
+  end_date   DateTime?
+  created_at DateTime  @default(now())
+  updated_at DateTime  @default(now())
 }
 
 // model CertificateInfo {
@@ -130,7 +132,7 @@ type WorkHistory {
 // }
 
 type CertificateInfo {
-  id          String?   @db.ObjectId
+  id          String?   @map("_id") @db.ObjectId
   issuer      String
   validator   String
   program     String
@@ -139,8 +141,8 @@ type CertificateInfo {
   level       Int
   issued_date DateTime
   end_date    DateTime?
-  created_at  DateTime? @default(now())
-  updated_at  DateTime? @default(now())
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @default(now())
 }
 
 model doctors {
@@ -157,4 +159,50 @@ model doctors {
 
   // @@map("doctors")
   user_id String @unique @db.ObjectId
+}
+
+type Prescription {
+  id         String?  @db.ObjectId
+  medicine   String   @db.ObjectId
+  quantity   Int
+  notes      String
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+}
+
+type DiseaseHistory {
+  id            String?        @db.ObjectId
+  name          String
+  diseases      String         @db.ObjectId
+  description   String
+  examiner      String         @db.ObjectId
+  prescriptions Prescription[]
+  examined_at   DateTime
+  reexamine_at  DateTime?
+  created_at    DateTime       @default(now())
+  updated_at    DateTime       @default(now())
+}
+
+model patients {
+  id               String           @id @default(auto()) @map("_id") @db.ObjectId
+  user_info        users?           @relation(fields: [user_id], references: [id])
+  diseases_history DiseaseHistory[]
+  created_at       DateTime         @default(now())
+  updated_at       DateTime         @updatedAt
+  user_id          String           @unique @db.ObjectId
+}
+
+model medicines {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  brand       String
+  description String
+  quantity    Int
+  price       Float
+  hospital    hospitals @relation(fields: [hospital_id], references: [id])
+  image       String
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+
+  hospital_id String @db.ObjectId
 }

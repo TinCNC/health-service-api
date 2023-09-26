@@ -8,3 +8,12 @@ export const Gallery = {
   created_at: t.Optional(t.Date()),
   updated_at: t.Optional(t.Date()),
 };
+
+export type GalleryResponse = {
+  id: string | null;
+  name: string | null;
+  description?: string | null;
+  file: string | null;
+  created_at: Date;
+  updated_at: Date;
+};

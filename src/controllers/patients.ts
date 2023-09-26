@@ -1,31 +1,30 @@
 import { Elysia } from "elysia";
-import { CreateUserDTO, UpdateUserDTO } from "../models";
+import { CreatePatientDTO, UpdatePatientDTO } from "../models";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { DefaultArgs } from "@prisma/client/runtime/library";
+import { generateObjectIdForSubdocumentList } from "../functions";
 
 export const PatientsController = (
   prisma: PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>
 ) =>
   new Elysia()
-    .get("/users", async () =>
-      prisma.users.findMany({
+    .get("/patients", async () =>
+      prisma.patients.findMany({
         select: {
           id: true,
-          username: true,
-          email: true,
-          info: true,
+          user_info: true,
+          diseases_history: true,
           created_at: true,
           updated_at: true,
         },
       })
     )
-    .get("/users/:id", ({ params: { id } }) =>
-      prisma.users.findFirst({
+    .get("/patients/:id", ({ params: { id } }) =>
+      prisma.patients.findFirst({
         select: {
           id: true,
-          username: true,
-          email: true,
-          info: true,
+          user_info: true,
+          diseases_history: true,
           created_at: true,
           updated_at: true,
         },
@@ -35,38 +34,24 @@ export const PatientsController = (
       })
     )
     .post(
-      "/users",
+      "/patients",
       async ({ body }) => {
-        body.password = await Bun.password.hash(body.password);
-        // const dob = new Date(body.info.dob);
-
-        // if (isNaN(Date.parse(body.info.dob))) {
-        //   console.log("Invalid format");
-        // }
-
-        if (!isNaN(Date.parse(body.info.dob))) {
-          body.info.dob = new Date().toISOString();
+        if (body.diseases_history !== undefined) {
+          generateObjectIdForSubdocumentList(body.diseases_history, true);
         }
-
-        // console.log(body.info.dob);
-        return prisma.users.create({ data: body });
+        return prisma.patients.create({ data: body });
       },
       {
-        body: CreateUserDTO,
+        body: CreatePatientDTO,
       }
     )
     .patch(
-      "/users/:id",
+      "/patients/:id",
       async ({ params: { id }, body }) => {
-        if (body.password !== undefined) {
-          body.password = await Bun.password.hash(body.password);
+        if (body.diseases_history !== undefined) {
+          generateObjectIdForSubdocumentList(body.diseases_history, true);
         }
-        if (body.info !== undefined) {
-          if (!isNaN(Date.parse(body.info.dob))) {
-            body.info.dob = new Date().toISOString();
-          }
-        }
-        return prisma.users.update({
+        return prisma.patients.update({
           where: {
             id: id,
           },
@@ -75,9 +60,9 @@ export const PatientsController = (
       },
 
       {
-        body: UpdateUserDTO,
+        body: UpdatePatientDTO,
       }
     )
-    .delete("/users/:id", ({ params: { id } }) =>
-      prisma.users.delete({ where: { id: id } })
+    .delete("/patients/:id", ({ params: { id } }) =>
+      prisma.patients.delete({ where: { id: id } })
     );

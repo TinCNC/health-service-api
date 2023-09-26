@@ -90,5 +90,5 @@ export const HospitalsController = (
       }
     )
     .delete("/hospitals/:id", ({ params: { id } }) =>
-      prisma.users.delete({ where: { id: id } })
+      prisma.hospitals.delete({ where: { id: id } })
     );
