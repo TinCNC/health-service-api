@@ -2,12 +2,13 @@ import { Elysia } from "elysia";
 import { CreateDoctorDTO, UpdateDoctorDTO } from "../models";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { DefaultArgs } from "@prisma/client/runtime/library";
+import { generateObjectIdForSubdocumentList } from "../functions";
 
 export const DoctorsController = (
   prisma: PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>
 ) =>
   new Elysia()
-    .get("/doctors", async () => {
+    .get("/doctors", async () =>
       prisma.doctors.findMany({
         select: {
           id: true,
@@ -21,8 +22,8 @@ export const DoctorsController = (
           created_at: true,
           updated_at: true,
         },
-      });
-    })
+      })
+    )
     .get("/doctors/:id", ({ params: { id } }) =>
       prisma.doctors.findFirst({
         select: {
@@ -45,6 +46,13 @@ export const DoctorsController = (
     .post(
       "/doctors",
       async ({ body }) => {
+        generateObjectIdForSubdocumentList(body.certificates);
+        if (body.gallery !== undefined) {
+          generateObjectIdForSubdocumentList(body.gallery);
+        }
+        if (body.work_history !== undefined) {
+          generateObjectIdForSubdocumentList(body.work_history);
+        }
         return prisma.doctors.create({ data: body });
       },
       {
@@ -54,6 +62,15 @@ export const DoctorsController = (
     .patch(
       "/doctors/:id",
       async ({ params: { id }, body }) => {
+        if (body.certificates !== undefined) {
+          generateObjectIdForSubdocumentList(body.certificates);
+        }
+        if (body.gallery !== undefined) {
+          generateObjectIdForSubdocumentList(body.gallery);
+        }
+        if (body.work_history !== undefined) {
+          generateObjectIdForSubdocumentList(body.work_history);
+        }
         return prisma.doctors.update({
           where: {
             id: id,

@@ -80,19 +80,17 @@ type Location {
 }
 
 model hospitals {
-  id           String       @id @default(auto()) @map("_id") @db.ObjectId
-  name         String       @unique
-  location     Location
-  director     String       @db.ObjectId
-  gallery      Gallery[]
-  capacity     Int
-  contact_info ContactInfo?
-  created_at   DateTime     @default(now())
-  updated_at   DateTime     @updatedAt
-
-  director_info users?        @relation(fields: [director], references: [id])
+  id            String       @id @default(auto()) @map("_id") @db.ObjectId
+  name          String       @unique
+  location      Location
+  director      String       @db.ObjectId
+  gallery       Gallery[]
+  capacity      Int
+  contact_info  ContactInfo?
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @updatedAt
+  director_info users?       @relation(fields: [director], references: [id])
   // @@map("hospitals")
-  WorkHistory   WorkHistory[]
 }
 
 // model WorkHistory {
@@ -108,11 +106,13 @@ model hospitals {
 // }
 
 type WorkHistory {
-  id         String?  @db.ObjectId
-  hospital   String   @db.ObjectId
+  id         String?   @db.ObjectId
+  hospital   String    @db.ObjectId
   salary     Float
   start_date DateTime
   end_date   DateTime
+  created_at DateTime? @default(now())
+  updated_at DateTime? @default(now())
 }
 
 // model CertificateInfo {
@@ -139,6 +139,8 @@ type CertificateInfo {
   level       Int
   issued_date DateTime
   end_date    DateTime?
+  created_at  DateTime? @default(now())
+  updated_at  DateTime? @default(now())
 }
 
 model doctors {

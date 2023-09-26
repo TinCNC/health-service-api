@@ -3,6 +3,7 @@ import { CreateHospitalDTO, UpdateHospitalDTO } from "../models";
 import { ObjectId } from "bson";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { DefaultArgs } from "@prisma/client/runtime/library";
+import { generateObjectIdForSubdocumentList } from "../functions";
 
 export const HospitalsController = (
   prisma: PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>
@@ -45,31 +46,8 @@ export const HospitalsController = (
       "/hospitals",
       async ({ body }) => {
         if (body.gallery !== undefined) {
-          let oldIds: ObjectId[] = [];
-          body.gallery.map((item) => {
-            let newId: ObjectId = new ObjectId(item.id);
-            let idConflict = false;
-            do {
-              if (
-                newId.equals(null) ||
-                newId.equals(undefined) ||
-                newId === undefined
-              )
-                newId = new ObjectId();
-              oldIds.forEach((oldId) => {
-                if (oldId.equals(newId)) {
-                  idConflict = true;
-                  return;
-                }
-              });
-            } while (idConflict);
-            oldIds.push(newId);
-            item.id = newId;
-            item.created_at = new Date();
-            item.updated_at = new Date();
-          });
+          generateObjectIdForSubdocumentList(body.gallery);
         }
-
         return prisma.hospitals.create({ data: body });
       },
       {
@@ -80,6 +58,7 @@ export const HospitalsController = (
       "/hospitals/:id",
       async ({ params: { id }, body }) => {
         if (body.gallery !== undefined) {
+          generateObjectIdForSubdocumentList(body.gallery);
           // const existingGallery = (
           //   await prisma.hospitals.findFirst({
           //     select: {
@@ -91,36 +70,11 @@ export const HospitalsController = (
           //   })
           // )?.gallery;
 
-          let oldIds: ObjectId[] = [];
-
           // if (existingGallery !== undefined) {
           //   oldIds.concat(
           //     existingGallery.map((item) => new ObjectId(item.id as string))
           //   );
           // }
-
-          body.gallery.map((item) => {
-            let newId: ObjectId = new ObjectId(item.id);
-            let idConflict = false;
-            do {
-              if (
-                newId.equals(null) ||
-                newId.equals(undefined) ||
-                newId === undefined
-              )
-                newId = new ObjectId();
-              oldIds.forEach((oldId) => {
-                if (oldId.equals(newId)) {
-                  idConflict = true;
-                  return;
-                }
-              });
-            } while (idConflict);
-            oldIds.push(newId);
-            item.id = newId;
-            item.created_at = new Date();
-            item.updated_at = new Date();
-          });
         }
 
         return prisma.hospitals.update({

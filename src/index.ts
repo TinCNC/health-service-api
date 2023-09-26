@@ -27,11 +27,11 @@ const app = new Elysia()
   .get("/", () => "Hi")
   .decorate("prisma", new PrismaClient())
   .use(cors())
-  .onStop(() => prisma.$disconnect())
   .use(DiseasesController(prisma))
   .use(UsersController(prisma))
   .use(DoctorsController(prisma))
   .use(HospitalsController(prisma))
+  .onStop(() => prisma.$disconnect())
   // .onStop(() => client.close())
   .listen(8080);
 
