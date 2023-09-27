@@ -7,6 +7,10 @@ import {
   UsersController,
   HospitalsController,
   DoctorsController,
+  PatientsController,
+  MedicinesController,
+  SpecialitiesController,
+  ChatsController,
 } from "./controllers";
 
 import { PrismaClient } from "@prisma/client";
@@ -26,13 +30,17 @@ const app = new Elysia()
   )
   .get("/", () => "Hi")
   .decorate("prisma", new PrismaClient())
+  .onStart(() => prisma.$connect())
   .use(cors())
-  .use(DiseasesController(prisma))
   .use(UsersController(prisma))
-  .use(DoctorsController(prisma))
+  .use(DiseasesController(prisma))
   .use(HospitalsController(prisma))
+  .use(DoctorsController(prisma))
+  .use(PatientsController(prisma))
+  .use(MedicinesController(prisma))
+  .use(SpecialitiesController(prisma))
+  .use(ChatsController(prisma))
   .onStop(() => prisma.$disconnect())
-  // .onStop(() => client.close())
   .listen(8080);
 
 console.log(

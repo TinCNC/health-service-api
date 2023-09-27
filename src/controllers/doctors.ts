@@ -1,11 +1,7 @@
 import { Elysia } from "elysia";
-import {
-  CreateDoctorDTO,
-  DoctorResponse,
-  UpdateDoctorDTO,
-  WorkHistoryResponse,
-} from "../models";
-import { Prisma, PrismaClient } from "@prisma/client";
+import { CreateDoctorDTO, UpdateDoctorDTO } from "../models";
+import { DoctorResponse, WorkHistoryResponse } from "../responses";
+import { Prisma, PrismaClient, doctors } from "@prisma/client";
 import { DefaultArgs } from "@prisma/client/runtime/library";
 import { generateObjectIdForSubdocumentList } from "../functions";
 
@@ -13,7 +9,7 @@ export const DoctorsController = (
   prisma: PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>
 ) =>
   new Elysia()
-    .decorate("query", {
+    .decorate("doctorQuery", {
       id: true,
       npi: true,
       user_info: true,
@@ -26,7 +22,7 @@ export const DoctorsController = (
       updated_at: true,
     })
     .decorate(
-      "modifyResponse",
+      "modifyDoctorResponse",
       async (doctorResponse: DoctorResponse): Promise<DoctorResponse> => {
         return {
           id: doctorResponse.id,
@@ -67,26 +63,29 @@ export const DoctorsController = (
     )
     .get(
       "/doctors",
-      async ({ query, modifyResponse }) =>
+      async ({ doctorQuery, modifyDoctorResponse }) =>
         await Promise.all(
           (
             await prisma.doctors.findMany({
-              select: query,
+              select: doctorQuery,
             })
           ).map(async (doctorResponse) => {
-            return modifyResponse(doctorResponse);
+            return modifyDoctorResponse(doctorResponse);
           })
         )
     )
-    .get("/doctors/:id", async ({ params: { id }, query, modifyResponse }) => {
-      const result = await prisma.doctors.findFirst({
-        select: query,
-        where: {
-          id: id,
-        },
-      });
-      if (result !== null) return modifyResponse(result);
-    })
+    .get(
+      "/doctors/:id",
+      async ({ params: { id }, doctorQuery, modifyDoctorResponse }) => {
+        const result = await prisma.doctors.findFirst({
+          select: doctorQuery,
+          where: {
+            id: id,
+          },
+        });
+        if (result !== null) return modifyDoctorResponse(result);
+      }
+    )
     .post(
       "/doctors",
       async ({ body }) => {

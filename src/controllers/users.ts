@@ -1,34 +1,66 @@
 import { Elysia } from "elysia";
 import { CreateUserDTO, UpdateUserDTO } from "../models";
-import { Prisma, PrismaClient } from "@prisma/client";
+import { UserResponse, AppointmentResponse } from "../responses/users";
+import { Prisma, PrismaClient, users } from "@prisma/client";
 import { DefaultArgs } from "@prisma/client/runtime/library";
 
 export const UsersController = (
   prisma: PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>
 ) =>
   new Elysia()
-    .get("/users", async () =>
-      prisma.users.findMany({
-        select: {
-          id: true,
-          username: true,
-          email: true,
-          info: true,
-          created_at: true,
-          updated_at: true,
-        },
-      })
+    .decorate(
+      "modifyUserResponse",
+      async (userResponse: users): Promise<UserResponse> => {
+        return {
+          id: userResponse.id,
+          username: userResponse.username,
+          phone: userResponse.phone,
+          email: userResponse.email,
+          info: userResponse.info,
+          notifications: userResponse.notifications,
+          appointments: await Promise.all(
+            userResponse.appointments.map(async (appointment) => {
+              const appointmentsPopulated: AppointmentResponse = {
+                id: appointment.id,
+                user_info: await prisma.users.findFirst({
+                  select: {
+                    id: true,
+                    username: true,
+                    info: {
+                      select: {
+                        first_name: true,
+                        last_name: true,
+                      },
+                    },
+                  },
+                  where: {
+                    id: appointment.user_id,
+                  },
+                }),
+                begin_at: appointment.begin_at,
+                end_at: appointment.end_at,
+              };
+              return appointmentsPopulated;
+            })
+          ),
+          created_at: userResponse.created_at,
+          updated_at: userResponse.updated_at,
+        };
+      }
+    )
+    .get(
+      "/users",
+      async ({ modifyUserResponse }) =>
+        await Promise.all(
+          (
+            await prisma.users.findMany()
+          ).map(async (userResponse) => {
+            return modifyUserResponse(userResponse);
+          })
+        )
     )
     .get("/users/:id", ({ params: { id } }) =>
       prisma.users.findFirst({
-        select: {
-          id: true,
-          username: true,
-          email: true,
-          info: true,
-          created_at: true,
-          updated_at: true,
-        },
         where: {
           id: id,
         },

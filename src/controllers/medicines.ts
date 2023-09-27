@@ -7,7 +7,7 @@ export const MedicinesController = (
   prisma: PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>
 ) =>
   new Elysia()
-    .decorate("query", {
+    .decorate("medicineQuery", {
       name: true,
       brand: true,
       hospital: true,
@@ -16,12 +16,12 @@ export const MedicinesController = (
       price: true,
       image: true,
     })
-    .get("/medicines", ({ query }) =>
-      prisma.medicines.findMany({ select: query })
+    .get("/medicines", ({ medicineQuery }) =>
+      prisma.medicines.findMany({ select: medicineQuery })
     )
-    .get("/medicines/:id", ({ params: { id }, query }) =>
+    .get("/medicines/:id", ({ params: { id }, medicineQuery }) =>
       prisma.medicines.findFirst({
-        select: query,
+        select: medicineQuery,
         where: {
           id: id,
         },

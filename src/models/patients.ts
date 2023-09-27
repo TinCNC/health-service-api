@@ -15,7 +15,7 @@ const DiseaseHistory = {
   name: t.String(),
   diseases: t.Any(),
   description: t.Optional(t.String()),
-  photos: t.Optional(t.Array(t.Object(Gallery))),
+  photos: t.Optional(t.Array(Gallery)),
   examiner: t.Any(),
   prescriptions: t.Array(t.Object(Prescription)),
   examined_at: t.Date(),

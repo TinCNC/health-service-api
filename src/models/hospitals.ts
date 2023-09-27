@@ -20,7 +20,7 @@ export const CreateHospitalDTO = t.Object({
   name: t.String(),
   location: t.Object(Location),
   director: t.Any(),
-  gallery: t.Optional(t.Array(t.Object(Gallery))),
+  gallery: t.Optional(t.Array(Gallery)),
   capacity: t.Integer({ minimum: 1 }),
   contact_info: t.Optional(t.Object(ContactInfo)),
 });
@@ -29,7 +29,7 @@ export const UpdateHospitalDTO = t.Object({
   name: t.Optional(t.String()),
   location: t.Optional(t.Object(Location)),
   director: t.Optional(t.Any()),
-  gallery: t.Optional(t.Array(t.Object(Gallery))),
+  gallery: t.Optional(t.Array(Gallery)),
   capacity: t.Optional(t.Integer({ minimum: 1 })),
   contact_info: t.Optional(t.Object(ContactInfo)),
 });

@@ -1,7 +1,7 @@
 import { t } from "elysia";
-import { Gallery, GalleryResponse } from "./submodels/gallery";
+import { Gallery } from "./submodels/gallery";
 
-const CertificateInfo = {
+const CertificateInfo = t.Object({
   id: t.Optional(t.Any()),
   issuer: t.String(),
   validator: t.String(),
@@ -13,9 +13,9 @@ const CertificateInfo = {
   expired_date: t.Any(),
   created_at: t.Optional(t.Date()),
   updated_at: t.Optional(t.Date()),
-};
+});
 
-const WorkHistory = {
+const WorkHistory = t.Object({
   id: t.Optional(t.Any()),
   hospital: t.Any(),
   salary: t.Number(),
@@ -23,61 +23,24 @@ const WorkHistory = {
   end_date: t.Any(),
   created_at: t.Optional(t.Date()),
   updated_at: t.Optional(t.Date()),
-};
+});
 
 export const CreateDoctorDTO = t.Object({
   npi: t.String(),
   user_id: t.Any(),
   speciality_id: t.String(),
-  gallery: t.Optional(t.Array(t.Object(Gallery))),
+  gallery: t.Optional(t.Array(Gallery)),
   biography: t.String(),
-  work_history: t.Optional(t.Array(t.Object(WorkHistory))),
-  certificates: t.Array(t.Object(CertificateInfo)),
+  work_history: t.Optional(t.Array(WorkHistory)),
+  certificates: t.Array(CertificateInfo),
 });
 
 export const UpdateDoctorDTO = t.Object({
   npi: t.Optional(t.String()),
   user_id: t.Optional(t.Any()),
   speciality_id: t.Optional(t.String()),
-  gallery: t.Optional(t.Array(t.Object(Gallery))),
+  gallery: t.Optional(t.Array(Gallery)),
   biography: t.Optional(t.String()),
-  work_history: t.Optional(t.Array(t.Object(WorkHistory))),
-  certificates: t.Optional(t.Array(t.Object(CertificateInfo))),
+  work_history: t.Optional(t.Array(WorkHistory)),
+  certificates: t.Optional(t.Array(CertificateInfo)),
 });
-
-export type CertificateInfoResponse = {
-  id: string | null;
-  issuer: string | null;
-  validator: string | null;
-  program: string | null;
-  type: string | null;
-  image: string | null;
-  level: string | null;
-  issued_date: Date;
-  expired_date: Date | null;
-  created_at: Date;
-  updated_at: Date;
-};
-
-export type WorkHistoryResponse = {
-  id: string | null;
-  hospital?: any;
-  salary: number;
-  start_date: Date;
-  end_date: Date | null;
-  created_at: Date;
-  updated_at: Date;
-};
-
-export type DoctorResponse = {
-  id: string;
-  npi: string | null;
-  user_info: any;
-  speciality: any;
-  gallery: GalleryResponse[];
-  biography: string | null;
-  work_history: WorkHistoryResponse[];
-  certificates: CertificateInfoResponse[];
-  created_at: Date;
-  updated_at: Date;
-};
