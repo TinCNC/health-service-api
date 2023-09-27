@@ -32,20 +32,39 @@ type UserInfo {
   avatar       String?
 }
 
-model users {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  username   String   @unique
-  email      String
-  password   String
-  phone      String
-  info       UserInfo
+type Appointment {
+  id       String?  @map("_id") @db.ObjectId
+  user_id  String   @db.ObjectId
+  begin_at DateTime
+  end_at   DateTime
+}
+
+type Notification {
+  id         String?  @map("_id") @db.ObjectId
+  title      String
+  message    String
+  type       String
   created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+}
+
+model users {
+  id            String         @id @default(auto()) @map("_id") @db.ObjectId
+  username      String         @unique
+  email         String
+  password      String
+  phone         String
+  info          UserInfo
+  appointments  Appointment[]
+  notifications Notification[]
+  created_at    DateTime       @default(now())
+  updated_at    DateTime       @updatedAt
 
   // @@map("users")
-  hospitals hospitals[]
-  doctor    doctors?
-  patient   patients?
+  hospitals      hospitals[]
+  doctor         doctors?
+  patient        patients?
+  chat_senders   chats[]     @relation("chat_sender")
+  chat_receivers chats[]     @relation("chat_receiver")
 }
 
 type ContactInfo {
@@ -54,17 +73,6 @@ type ContactInfo {
   email   String? @default("123abc@abc.com")
   address String?
 }
-
-// model Gallery {
-//   id          String     @id @default(auto()) @map("_id") @db.ObjectId
-//   name        String
-//   description String?
-//   file        String
-//   doctors     doctors?   @relation(fields: [doctorsId], references: [id])
-//   doctorsId   String?    @db.ObjectId
-//   hospitals   hospitals? @relation(fields: [hospitalsId], references: [id])
-//   hospitalsId String?    @db.ObjectId
-// }
 
 type Gallery {
   id          String?  @map("_id") @db.ObjectId
@@ -95,18 +103,6 @@ model hospitals {
   medicines     medicines[]
 }
 
-// model WorkHistory {
-//   id          String    @id @default(auto()) @map("_id") @db.ObjectId
-//   hospital    hospitals @relation(fields: [hospitalsId], references: [id])
-//   salary      Float
-//   file        String
-//   start_date  DateTime
-//   end_date    DateTime
-//   hospitalsId String    @db.ObjectId
-//   doctors     doctors?  @relation(fields: [doctorsId], references: [id])
-//   doctorsId   String?   @db.ObjectId
-// }
-
 type WorkHistory {
   id         String?   @map("_id") @db.ObjectId
   hospital   String    @db.ObjectId
@@ -116,20 +112,6 @@ type WorkHistory {
   created_at DateTime  @default(now())
   updated_at DateTime  @default(now())
 }
-
-// model CertificateInfo {
-//   id          String   @id @default(auto()) @map("_id") @db.ObjectId
-//   issuer      String
-//   validator   String
-//   program     String
-//   type        String
-//   image       String
-//   level       Int
-//   issued_date DateTime
-//   end_date    DateTime
-//   doctors     doctors? @relation(fields: [doctorsId], references: [id])
-//   doctorsId   String?  @db.ObjectId
-// }
 
 type CertificateInfo {
   id          String?   @map("_id") @db.ObjectId
@@ -149,7 +131,7 @@ model doctors {
   id           String            @id @default(auto()) @map("_id") @db.ObjectId
   npi          String            @unique
   user_info    users?            @relation(fields: [user_id], references: [id])
-  speciality   String
+  speciality   specialities      @relation(fields: [speciality_id], references: [id])
   gallery      Gallery[]
   biography    String
   work_history WorkHistory[]
@@ -158,7 +140,8 @@ model doctors {
   updated_at   DateTime          @updatedAt
 
   // @@map("doctors")
-  user_id String @unique @db.ObjectId
+  user_id       String @unique @db.ObjectId
+  speciality_id String @map("speciality") @db.ObjectId
 }
 
 type Prescription {
@@ -174,7 +157,8 @@ type DiseaseHistory {
   id            String?        @db.ObjectId
   name          String
   diseases      String         @db.ObjectId
-  description   String
+  description   String?
+  photos        Gallery[]
   examiner      String         @db.ObjectId
   prescriptions Prescription[]
   examined_at   DateTime
@@ -196,13 +180,42 @@ model medicines {
   id          String    @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   brand       String
-  description String
+  description String?
   quantity    Int
   price       Float
   hospital    hospitals @relation(fields: [hospital_id], references: [id])
-  image       String
+  image       String?
   created_at  DateTime  @default(now())
   updated_at  DateTime  @updatedAt
 
-  hospital_id String @db.ObjectId
+  hospital_id String @map("hospital") @db.ObjectId
+}
+
+model specialities {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String?
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  doctors     doctors[]
+}
+
+type ChatMetadata {
+  reaction            String?
+  deleted_sender_only Boolean
+  deleted_everyone    Boolean
+  reply_to            String? @db.ObjectId
+}
+
+model chats {
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  receiver    users         @relation("chat_receiver", fields: [receiver_id], references: [id])
+  sender      users         @relation("chat_sender", fields: [sender_id], references: [id])
+  message     String
+  meta        ChatMetadata?
+  sent_at     DateTime      @default(now())
+  modified_at DateTime      @updatedAt
+
+  receiver_id String @map("sender") @db.ObjectId
+  sender_id   String @map("receiver") @db.ObjectId
 }

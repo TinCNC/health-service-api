@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { Gallery } from "./submodels/gallery";
 
 const Prescription = {
   id: t.Optional(t.Any()),
@@ -13,7 +14,8 @@ const DiseaseHistory = {
   id: t.Optional(t.Any()),
   name: t.String(),
   diseases: t.Any(),
-  description: t.String(),
+  description: t.Optional(t.String()),
+  photos: t.Optional(t.Array(t.Object(Gallery))),
   examiner: t.Any(),
   prescriptions: t.Array(t.Object(Prescription)),
   examined_at: t.Date(),

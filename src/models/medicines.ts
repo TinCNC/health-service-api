@@ -6,8 +6,8 @@ export const CreateMedicineDTO = t.Object({
   description: t.Optional(t.String()),
   quantity: t.Integer(),
   price: t.Number(),
-  hospital: t.Any(),
-  image: t.String(),
+  hospital_id: t.Any(),
+  image: t.Optional(t.String()),
 });
 
 export const UpdateMedicineDTO = t.Object({
@@ -16,6 +16,6 @@ export const UpdateMedicineDTO = t.Object({
   description: t.Optional(t.String()),
   quantity: t.Optional(t.Integer()),
   price: t.Optional(t.Number()),
-  hospital: t.Optional(t.Any()),
+  hospital_id: t.Optional(t.Any()),
   image: t.Optional(t.String()),
 });

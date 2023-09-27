@@ -28,7 +28,7 @@ const WorkHistory = {
 export const CreateDoctorDTO = t.Object({
   npi: t.String(),
   user_id: t.Any(),
-  speciality: t.String(),
+  speciality_id: t.String(),
   gallery: t.Optional(t.Array(t.Object(Gallery))),
   biography: t.String(),
   work_history: t.Optional(t.Array(t.Object(WorkHistory))),
@@ -38,7 +38,7 @@ export const CreateDoctorDTO = t.Object({
 export const UpdateDoctorDTO = t.Object({
   npi: t.Optional(t.String()),
   user_id: t.Optional(t.Any()),
-  speciality: t.Optional(t.String()),
+  speciality_id: t.Optional(t.String()),
   gallery: t.Optional(t.Array(t.Object(Gallery))),
   biography: t.Optional(t.String()),
   work_history: t.Optional(t.Array(t.Object(WorkHistory))),
@@ -73,7 +73,7 @@ export type DoctorResponse = {
   id: string;
   npi: string | null;
   user_info: any;
-  speciality: string | null;
+  speciality: any;
   gallery: GalleryResponse[];
   biography: string | null;
   work_history: WorkHistoryResponse[];
