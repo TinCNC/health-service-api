@@ -50,9 +50,9 @@ type Notification {
 model users {
   id            String         @id @default(auto()) @map("_id") @db.ObjectId
   username      String         @unique
-  email         String
-  password      String
-  phone         String
+  email         String         @unique
+  // password      String
+  phone         String         @unique
   info          UserInfo
   appointments  Appointment[]
   notifications Notification[]
@@ -65,6 +65,8 @@ model users {
   patient        patients?
   chat_senders   chats[]     @relation("chat_sender")
   chat_receivers chats[]     @relation("chat_receiver")
+  session        sessions[]
+  key            keys[]
 }
 
 type ContactInfo {
@@ -218,4 +220,24 @@ model chats {
 
   receiver_id String @map("sender") @db.ObjectId
   sender_id   String @map("receiver") @db.ObjectId
+}
+
+//Lucia schemas
+model sessions {
+  id             String @id @map("_id")
+  user_id        String @db.ObjectId
+  active_expires BigInt
+  idle_expires   BigInt
+  user           users  @relation(references: [id], fields: [user_id], onDelete: Cascade)
+
+  @@index([user_id])
+}
+
+model keys {
+  id              String  @id @map("_id")
+  hashed_password String?
+  user_id         String  @db.ObjectId
+  user            users   @relation(references: [id], fields: [user_id], onDelete: Cascade)
+
+  @@index([user_id])
 }

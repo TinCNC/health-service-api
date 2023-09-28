@@ -10,9 +10,11 @@
     "@elysiajs/cors": "^0.6.0",
     "@elysiajs/jwt": "^0.6.4",
     "@elysiajs/swagger": "^0.7.3",
+    "@lucia-auth/adapter-prisma": "^3.0.1",
     "@prisma/client": "^5.3.1",
     "bson": "^6.1.0",
-    "elysia": "latest"
+    "elysia": "latest",
+    "lucia": "^2.7.0"
   },
   "devDependencies": {
     "bun-types": "latest",

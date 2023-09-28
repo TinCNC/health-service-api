@@ -1,6 +1,7 @@
 import { Elysia } from "elysia";
 import { swagger } from "@elysiajs/swagger";
 import { cors } from "@elysiajs/cors";
+import { prisma } from "./db";
 
 import {
   DiseasesController,
@@ -12,10 +13,6 @@ import {
   SpecialitiesController,
   ChatsController,
 } from "./controllers";
-
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
 
 const app = new Elysia()
   .use(
@@ -29,7 +26,6 @@ const app = new Elysia()
     })
   )
   .get("/", () => "Hi")
-  .decorate("prisma", new PrismaClient())
   .onStart(() => prisma.$connect())
   .use(cors())
   .use(UsersController(prisma))

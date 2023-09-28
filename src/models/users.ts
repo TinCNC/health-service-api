@@ -12,15 +12,15 @@ const Notification = t.Object({
 const Appointment = t.Object({
   id: t.Optional(t.String()),
   user_id: t.String(),
-  begin_at: t.Date(),
-  end_at: t.Date(),
+  begin_at: t.String() || t.Date(),
+  end_at: t.String() || t.Date(),
 });
 
 const UserInfo = t.Object({
   first_name: t.String(),
   last_name: t.String(),
   gender: t.String(),
-  dob: t.String(),
+  dob: t.String() || t.Date(),
   home_address: t.String(),
   avatar: t.Optional(t.String()),
 });
@@ -36,6 +36,11 @@ export const CreateUserDTO = t.Object({
   appointments: t.Optional(t.Array(Appointment)),
   notifications: t.Optional(t.Array(Notification)),
   info: UserInfo,
+});
+
+export const SigninDTO = t.Object({
+  username: t.String(),
+  password: t.String(),
 });
 
 export const UpdateUserDTO = t.Object({
