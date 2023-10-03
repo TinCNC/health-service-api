@@ -1,8 +1,10 @@
 import { Elysia } from "elysia";
 import {
+  ChatQuery,
   CreateUserDTO,
   SigninDTO,
   UpdateUserDTO,
+  UserSearchQuery,
   // CreateAppointmentRequest,
 } from "../models";
 // import { UserResponse, AppointmentResponse } from "../responses/users";
@@ -121,8 +123,120 @@ export const UsersController = (
       };
     })
     .get(
+      "/currentUser/chats/:destinationUser",
+      async ({
+        request,
+        set,
+        params: { destinationUser },
+        query: { message },
+      }) => {
+        const authRequest = auth.handleRequest({ request, set });
+        const session = await authRequest.validate();
+        if (!session) {
+          set.status = 401;
+          return {
+            code: set.status,
+            message: "You must login before using this feature",
+            logged_in: false,
+          };
+        }
+        const userId = session.user.userId;
+
+        return (
+          await prisma.chats.findMany({
+            include: {
+              sender: true,
+              receiver: true,
+            },
+            where: {
+              OR: [
+                {
+                  message: {
+                    contains: message || undefined,
+                  },
+                  sender_id: userId,
+                  receiver_id: destinationUser,
+                },
+                {
+                  message: {
+                    contains: message || undefined,
+                  },
+                  sender_id: destinationUser,
+                  receiver_id: userId,
+                },
+              ],
+            },
+            orderBy: {
+              sent_at: "asc",
+            },
+          })
+        ).map((item) => {
+          const direction = item.sender_id == userId ? "Outcoming" : "Incoming";
+          const chosen_receiver_info =
+            item.sender_id == userId ? item.receiver : item.sender;
+          return {
+            id: item.id,
+            direction: direction,
+            chosen_receiver_info: chosen_receiver_info,
+            message: item.message,
+            sent_at: item.sent_at,
+            modified_at: item.modified_at,
+            meta: item.meta,
+          };
+        });
+      },
+      {
+        query: ChatQuery,
+      }
+    )
+    .get(
       "/users",
-      async ({ userQuery }) => await prisma.users.findMany(userQuery)
+      async ({
+        userQuery,
+        query: {
+          username,
+          email,
+          phone,
+          first_name,
+          last_name,
+          full_name,
+          gender,
+          dob,
+          home_address,
+        },
+      }) =>
+        await prisma.users.findMany({
+          ...userQuery,
+          where: {
+            username: {
+              contains: username || undefined,
+            },
+            email: {
+              contains: email || undefined,
+            },
+            phone: {
+              contains: phone || undefined,
+            },
+            info: {
+              is: {
+                first_name: {
+                  contains: first_name || undefined,
+                },
+                last_name: {
+                  contains: last_name || undefined,
+                },
+                gender: {
+                  contains: gender || undefined,
+                },
+                // dob: dob,
+                home_address: {
+                  contains: home_address || undefined,
+                },
+              },
+            },
+          },
+        }),
+      { query: UserSearchQuery }
     )
     .get("/users/:id", ({ params: { id }, userQuery }) =>
       prisma.users.findFirst({

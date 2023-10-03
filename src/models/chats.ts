@@ -20,3 +20,7 @@ export const UpdateChatDTO = t.Object({
   message: t.Optional(t.String()),
   meta: t.Optional(ChatMetaData),
 });
+
+export const ChatQuery = t.Object({
+  message: t.Optional(t.String()),
+});

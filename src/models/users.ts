@@ -37,6 +37,18 @@ const UserInfo = t.Object({
 //   end_at: Date;
 // };
 
+export const UserSearchQuery = t.Object({
+  username: t.Optional(t.String()),
+  email: t.Optional(t.String()),
+  phone: t.Optional(t.String()),
+  first_name: t.Optional(t.String()),
+  last_name: t.Optional(t.String()),
+  full_name: t.Optional(t.String()),
+  gender: t.Optional(t.String()),
+  dob: t.Optional(t.String() || t.Date()),
+  home_address: t.Optional(t.String()),
+});
+
 export const CreateUserDTO = t.Object({
   username: t.String(),
   email: t.String({

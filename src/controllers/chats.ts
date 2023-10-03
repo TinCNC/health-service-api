@@ -1,5 +1,5 @@
-import { Elysia } from "elysia";
-import { CreateChatDTO, UpdateChatDTO } from "../models";
+import { Elysia, t } from "elysia";
+import { ChatQuery, CreateChatDTO, UpdateChatDTO } from "../models";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { DefaultArgs } from "@prisma/client/runtime/library";
 
@@ -7,7 +7,20 @@ export const ChatsController = (
   prisma: PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>
 ) =>
   new Elysia()
-    .get("/chats", () => prisma.chats.findMany())
+    .get(
+      "/chats",
+      ({ query: { message } }) =>
+        prisma.chats.findMany({
+          where: {
+            message: {
+              contains: message || undefined,
+            },
+          },
+        }),
+      {
+        query: ChatQuery,
+      }
+    )
     .get("/chats/:id", ({ params: { id } }) =>
       prisma.chats.findFirst({
         where: {
