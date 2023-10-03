@@ -10,8 +10,13 @@ const Notification = t.Object({
 });
 
 const Appointment = t.Object({
-  id: t.Optional(t.String()),
-  user_id: t.String(),
+  person_to_meet: t.String(),
+  begin_at: t.String() || t.Date(),
+  end_at: t.String() || t.Date(),
+});
+
+const PersonToMeet = t.Object({
+  appointment_person: t.String(),
   begin_at: t.String() || t.Date(),
   end_at: t.String() || t.Date(),
 });
@@ -25,6 +30,13 @@ const UserInfo = t.Object({
   avatar: t.Optional(t.String()),
 });
 
+// export type CreateAppointmentRequest = {
+//   appointment_person: string;
+//   person_to_meet: string;
+//   begin_at: Date;
+//   end_at: Date;
+// };
+
 export const CreateUserDTO = t.Object({
   username: t.String(),
   email: t.String({
@@ -34,6 +46,7 @@ export const CreateUserDTO = t.Object({
   password: t.String(),
   phone: t.String(),
   appointments: t.Optional(t.Array(Appointment)),
+  people_to_meet: t.Optional(t.Array(PersonToMeet)),
   notifications: t.Optional(t.Array(Notification)),
   info: UserInfo,
 });

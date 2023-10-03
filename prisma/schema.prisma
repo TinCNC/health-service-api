@@ -6,8 +6,9 @@ generator client {
 }
 
 datasource db {
-  provider = "mongodb"
-  url      = env("DATABASE_URL")
+  provider     = "mongodb"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
 }
 
 model diseases {
@@ -32,11 +33,21 @@ type UserInfo {
   avatar       String?
 }
 
-type Appointment {
-  id       String?  @map("_id") @db.ObjectId
-  user_id  String   @db.ObjectId
-  begin_at DateTime
-  end_at   DateTime
+// type Appointment {
+//   id       String?  @map("_id") @db.ObjectId
+//   user_id  String   @db.ObjectId
+//   begin_at DateTime
+//   end_at   DateTime
+// }
+
+model appointments {
+  id                      String   @id @default(auto()) @map("_id") @db.ObjectId
+  appointment_person      String   @db.ObjectId
+  person_to_meet          String   @db.ObjectId
+  begin_at                DateTime
+  end_at                  DateTime
+  appointment_person_info users?   @relation("appointment_person", fields: [appointment_person], references: [id])
+  person_to_meet_info     users?   @relation("person_to_meet", fields: [person_to_meet], references: [id])
 }
 
 type Notification {
@@ -48,23 +59,22 @@ type Notification {
 }
 
 model users {
-  id            String         @id @default(auto()) @map("_id") @db.ObjectId
-  username      String         @unique
-  email         String         @unique
-  // password      String
-  phone         String         @unique
-  info          UserInfo
-  appointments  Appointment[]
-  notifications Notification[]
-  created_at    DateTime       @default(now())
-  updated_at    DateTime       @updatedAt
-
+  id             String         @id @default(auto()) @map("_id") @db.ObjectId
+  username       String         @unique
+  email          String         @unique
+  phone          String         @unique
+  info           UserInfo
+  notifications  Notification[]
+  created_at     DateTime       @default(now())
+  updated_at     DateTime       @updatedAt
+  appointments   appointments[] @relation("appointment_person")
+  people_to_meet appointments[] @relation("person_to_meet")
   // @@map("users")
   hospitals      hospitals[]
   doctor         doctors?
   patient        patients?
-  chat_senders   chats[]     @relation("chat_sender")
-  chat_receivers chats[]     @relation("chat_receiver")
+  chat_senders   chats[]        @relation("chat_sender")
+  chat_receivers chats[]        @relation("chat_receiver")
   session        sessions[]
   key            keys[]
 }

@@ -1,6 +1,11 @@
 import { Elysia } from "elysia";
-import { CreateUserDTO, SigninDTO, UpdateUserDTO } from "../models";
-import { UserResponse, AppointmentResponse } from "../responses/users";
+import {
+  CreateUserDTO,
+  SigninDTO,
+  UpdateUserDTO,
+  // CreateAppointmentRequest,
+} from "../models";
+// import { UserResponse, AppointmentResponse } from "../responses/users";
 import { Prisma, PrismaClient, users } from "@prisma/client";
 import { DefaultArgs } from "@prisma/client/runtime/library";
 import { ObjectId } from "bson";
@@ -11,46 +16,88 @@ export const UsersController = (
   prisma: PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>
 ) =>
   new Elysia()
-    .decorate(
-      "modifyUserResponse",
-      async (userResponse: users): Promise<UserResponse> => {
-        return {
-          id: userResponse.id,
-          username: userResponse.username,
-          phone: userResponse.phone,
-          email: userResponse.email,
-          info: userResponse.info,
-          notifications: userResponse.notifications,
-          appointments: await Promise.all(
-            userResponse.appointments.map(async (appointment) => {
-              const appointmentsPopulated: AppointmentResponse = {
-                id: appointment.id,
-                user_info: await prisma.users.findFirst({
+    .decorate("userQuery", {
+      include: {
+        appointments: {
+          select: {
+            person_to_meet_info: {
+              select: {
+                id: true,
+                email: true,
+                phone: true,
+                info: {
                   select: {
-                    id: true,
-                    username: true,
-                    info: {
-                      select: {
-                        first_name: true,
-                        last_name: true,
-                      },
-                    },
+                    first_name: true,
+                    last_name: true,
                   },
-                  where: {
-                    id: appointment.user_id,
+                },
+              },
+            },
+            begin_at: true,
+            end_at: true,
+          },
+        },
+        people_to_meet: {
+          select: {
+            appointment_person_info: {
+              select: {
+                id: true,
+                email: true,
+                phone: true,
+                info: {
+                  select: {
+                    first_name: true,
+                    last_name: true,
                   },
-                }),
-                begin_at: appointment.begin_at,
-                end_at: appointment.end_at,
-              };
-              return appointmentsPopulated;
-            })
-          ),
-          created_at: userResponse.created_at,
-          updated_at: userResponse.updated_at,
-        };
-      }
-    )
+                },
+              },
+            },
+            begin_at: true,
+            end_at: true,
+          },
+        },
+      },
+    })
+    // .decorate(
+    //   "modifyUserResponse",
+    //   async (userResponse: users): Promise<UserResponse> => {
+    //     return {
+    //       id: userResponse.id,
+    //       username: userResponse.username,
+    //       phone: userResponse.phone,
+    //       email: userResponse.email,
+    //       info: userResponse.info,
+    //       notifications: userResponse.notifications,
+    //       appointments: await Promise.all(
+    //         userResponse.appointments.map(async (appointment) => {
+    //           const appointmentsPopulated: AppointmentResponse = {
+    //             id: appointment.id,
+    //             user_info: await prisma.users.findFirst({
+    //               select: {
+    //                 id: true,
+    //                 username: true,
+    //                 info: {
+    //                   select: {
+    //                     first_name: true,
+    //                     last_name: true,
+    //                   },
+    //                 },
+    //               },
+    //               where: {
+    //                 id: appointment.user_id,
+    //               },
+    //             }),
+    //             begin_at: appointment.begin_at,
+    //             end_at: appointment.end_at,
+    //           };
+    //           return appointmentsPopulated;
+    //         })
+    //       ),
+    //       created_at: userResponse.created_at,
+    //       updated_at: userResponse.updated_at,
+    //     };
+    //   }
+    // )
     .get("/currentUser", async ({ request, set }) => {
       const authRequest = auth.handleRequest({ request, set });
       const session = await authRequest.validate();
@@ -75,17 +122,11 @@ export const UsersController = (
     })
     .get(
       "/users",
-      async ({ modifyUserResponse }) =>
-        await Promise.all(
-          (
-            await prisma.users.findMany()
-          ).map(async (userResponse) => {
-            return modifyUserResponse(userResponse);
-          })
-        )
+      async ({ userQuery }) => await prisma.users.findMany(userQuery)
     )
-    .get("/users/:id", ({ params: { id } }) =>
+    .get("/users/:id", ({ params: { id }, userQuery }) =>
       prisma.users.findFirst({
+        ...userQuery,
         where: {
           id: id,
         },
@@ -101,6 +142,7 @@ export const UsersController = (
           phone,
           info,
           appointments,
+          people_to_meet,
           notifications,
         } = body;
         console.log(password.length);
@@ -129,8 +171,9 @@ export const UsersController = (
         }
         try {
           // console.log(body);
+          const userId = new ObjectId().toString();
           const user = await auth.createUser({
-            userId: new ObjectId().toString(),
+            userId,
             key: {
               providerId: "username", // auth method
               providerUserId: username.toLowerCase(), // unique id when using "username" auth method
@@ -142,11 +185,41 @@ export const UsersController = (
               email,
               phone,
               info,
-              appointments,
+              // appointments,
               notifications,
             },
           });
-          // console.log(user);
+
+          if (appointments !== undefined) {
+            const appointmentCreateManyArray: Prisma.appointmentsCreateManyInput[] =
+              appointments.map((item) => {
+                return {
+                  appointment_person: userId,
+                  person_to_meet: item.person_to_meet,
+                  begin_at: item.begin_at,
+                  end_at: item.end_at,
+                };
+              });
+            await prisma.appointments.createMany({
+              data: appointmentCreateManyArray,
+            });
+          }
+
+          if (people_to_meet !== undefined) {
+            const poepleToMeetCreateManyArray: Prisma.appointmentsCreateManyInput[] =
+              people_to_meet.map((item) => {
+                return {
+                  appointment_person: item.appointment_person,
+                  person_to_meet: userId,
+                  begin_at: item.begin_at,
+                  end_at: item.end_at,
+                };
+              });
+            await prisma.appointments.createMany({
+              data: poepleToMeetCreateManyArray,
+            });
+          }
+
           const session = await auth.createSession({
             userId: user.userId,
             attributes: {},

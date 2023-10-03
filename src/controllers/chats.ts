@@ -7,7 +7,7 @@ export const ChatsController = (
   prisma: PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>
 ) =>
   new Elysia()
-    .get("/chats", () => prisma.diseases.findMany())
+    .get("/chats", () => prisma.chats.findMany())
     .get("/chats/:id", ({ params: { id } }) =>
       prisma.chats.findFirst({
         where: {

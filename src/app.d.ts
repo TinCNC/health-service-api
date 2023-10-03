@@ -10,8 +10,15 @@ type UserInfo = {
 };
 
 type Appointment = {
-  id?: string | undefined;
-  user_id: string;
+  // id?: string | undefined;
+  person_to_meet: string;
+  begin_at: string | Date;
+  end_at: string | Date;
+};
+
+type PersonToMeet = {
+  // id?: string | undefined;
+  appointment_person: string;
   begin_at: string | Date;
   end_at: string | Date;
 };
@@ -30,7 +37,8 @@ declare namespace Lucia {
     email: string;
     phone: string;
     info: UserInfo;
-    appointments?: Appointment[] | undefined;
+    // appointments?: Appointment[] | undefined;
+    // people_to_meet?: Appointment[] | undefined;
     notifications?: Notification[] | undefined;
   };
   type DatabaseSessionAttributes = {};

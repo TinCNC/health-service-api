@@ -20,7 +20,7 @@ const app = new Elysia()
       documentation: {
         info: {
           title: "Healthcare API Documentation",
-          version: "1.0.0",
+          version: "1.0.50",
         },
       },
     })
