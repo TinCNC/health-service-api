@@ -1,11 +1,6 @@
 import { t } from "elysia";
+import { Gallery } from "./submodels/gallery";
 import { emailValidation } from "../regex";
-
-const Gallery = {
-  name: t.String(),
-  description: t.Optional(t.String()),
-  file: t.String(),
-};
 
 const ContactInfo = {
   website: t.Optional(t.String()),
@@ -21,28 +16,20 @@ const Location = {
   coordinates: t.Array(t.Number(), { minItems: 2, maxItems: 2 }),
 };
 
-const HospitalSchema = {
+export const CreateHospitalDTO = t.Object({
   name: t.String(),
   location: t.Object(Location),
   director: t.Any(),
-  gallery: t.Array(t.Object(Gallery)),
+  gallery: t.Optional(t.Array(Gallery)),
   capacity: t.Integer({ minimum: 1 }),
-  phone: t.String(),
   contact_info: t.Optional(t.Object(ContactInfo)),
-};
-
-const CreatedAt = {
-  created_at: t.Optional(t.Date()),
-};
-
-const UpdatedAt = {
-  updated_at: t.Optional(t.Date()),
-};
-
-export const CreateHospitalDTO = t.Object({
-  ...HospitalSchema,
-  ...CreatedAt,
-  ...UpdatedAt,
 });
 
-export const UpdateHospitalDTO = t.Object({ ...HospitalSchema, ...UpdatedAt });
+export const UpdateHospitalDTO = t.Object({
+  name: t.Optional(t.String()),
+  location: t.Optional(t.Object(Location)),
+  director: t.Optional(t.Any()),
+  gallery: t.Optional(t.Array(Gallery)),
+  capacity: t.Optional(t.Integer({ minimum: 1 })),
+  contact_info: t.Optional(t.Object(ContactInfo)),
+});

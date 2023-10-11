@@ -1,15 +1,25 @@
-import { MongoClient } from "mongodb";
+import { PrismaClient } from "@prisma/client";
+import { prisma as prismaAdapter } from "@lucia-auth/adapter-prisma";
+import { lucia } from "lucia";
+import { elysia } from "lucia/middleware";
 
-const credentials = "X509-cert-4340260801975597652.pem";
-const mongo = new MongoClient(
-  "mongodb+srv://geo.cuj0ztx.mongodb.net/healthcare_map?authSource=%24external&authMechanism=MONGODB-X509&retryWrites=true&w=majority",
-  {
-    tls: true,
-    tlsCertificateKeyFile: credentials,
-    authMechanism: "MONGODB-X509",
-  }
-);
+export const prisma = new PrismaClient();
 
-export const client = await mongo.connect();
+export const auth = lucia({
+  env: "DEV", // "PROD" if deployed to HTTPS
+  middleware: elysia(),
+  adapter: prismaAdapter(prisma, {
+    user: "users",
+    session: "sessions",
+    key: "keys",
+  }),
 
-export const db = client.db();
+  getUserAttributes: (data) => {
+    return {
+      username: data.username,
+      email: data.email,
+    };
+  },
+});
+
+export type Auth = typeof auth;

@@ -1,0 +1,35 @@
+import { t } from "elysia";
+import { Gallery } from "./submodels/gallery";
+
+const Prescription = {
+  id: t.Optional(t.Any()),
+  medicine: t.Any(),
+  quantity: t.Integer(),
+  notes: t.String(),
+  created_at: t.Optional(t.Date()),
+  updated_at: t.Optional(t.Date()),
+};
+
+const DiseaseHistory = {
+  id: t.Optional(t.Any()),
+  name: t.String(),
+  diseases: t.Any(),
+  description: t.Optional(t.String()),
+  photos: t.Optional(t.Array(Gallery)),
+  examiner: t.Any(),
+  prescriptions: t.Array(t.Object(Prescription)),
+  examined_at: t.Date(),
+  reexamine_at: t.Optional(t.Date()),
+  created_at: t.Optional(t.Date()),
+  updated_at: t.Optional(t.Date()),
+};
+
+export const CreatePatientDTO = t.Object({
+  user_id: t.Any(),
+  diseases_history: t.Optional(t.Array(t.Object(DiseaseHistory))),
+});
+
+export const UpdatePatientDTO = t.Object({
+  user_id: t.Optional(t.Any()),
+  diseases_history: t.Optional(t.Array(t.Object(DiseaseHistory))),
+});

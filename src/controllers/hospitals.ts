@@ -1,62 +1,94 @@
 import { Elysia } from "elysia";
-import { ObjectId } from "mongodb";
 import { CreateHospitalDTO, UpdateHospitalDTO } from "../models";
-import { hospitals, users } from "../collections";
-import { query } from "@bluelibs/nova";
+import { ObjectId } from "bson";
+import { Prisma, PrismaClient } from "@prisma/client";
+import { DefaultArgs } from "@prisma/client/runtime/library";
+import { generateObjectIdForSubdocumentList } from "../functions";
 
-export const HospitalsController = new Elysia()
-  //   .get("/hospitals", () => hospitals.find().toArray())
-  .get(
-    "/hospitals",
-    async () =>
-      await query(hospitals, {
-        name: 1,
-        location: 1,
-        // director: 1,
-        capacity: 1,
-        gallery: 1,
-        contact_info: 1,
-        director_info: {
-          phone: 1,
-          info: {
-            first_name: 1,
-            last_name: 1,
-            gender: 1,
-          },
+export const HospitalsController = (
+  prisma: PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>
+) =>
+  new Elysia()
+    .get("/hospitals", async () =>
+      prisma.hospitals.findMany({
+        select: {
+          id: true,
+          name: true,
+          location: true,
+          capacity: true,
+          gallery: true,
+          contact_info: true,
+          director_info: true,
+          created_at: true,
+          updated_at: true,
         },
-        created_at: 1,
-        updated_at: 1,
-      }).toArray()
-  )
-  .get("/hospitals/:id", ({ params: { id } }) =>
-    hospitals.findOne({ _id: new ObjectId(id) })
-  )
-  .post(
-    "/hospitals",
-    ({ body }) => {
-      body.director = new ObjectId(body.director);
-      body.created_at = new Date();
-      body.updated_at = new Date();
-      hospitals.createIndex({ name: 1 }, { unique: true });
-      hospitals.createIndex({ location: "2dsphere" }, { unique: true });
-      return hospitals.insertOne(body);
-    },
-    {
-      body: CreateHospitalDTO,
-    }
-  )
-  .patch(
-    "/hospitals/:id",
-    ({ params: { id }, body }) => {
-      body.director = new ObjectId(body.director);
-      body.updated_at = new Date();
-      hospitals.updateOne({ _id: new ObjectId(id) }, { $set: body });
-      return body;
-    },
-    {
-      body: UpdateHospitalDTO,
-    }
-  )
-  .delete("/hospitals/:id", ({ params: { id } }) => {
-    return hospitals.findOneAndDelete({ _id: new ObjectId(id) });
-  });
+      })
+    )
+    .get("/hospitals/:id", ({ params: { id } }) =>
+      prisma.hospitals.findFirst({
+        select: {
+          id: true,
+          name: true,
+          location: true,
+          capacity: true,
+          gallery: true,
+          contact_info: true,
+          director_info: true,
+          created_at: true,
+          updated_at: true,
+        },
+        where: {
+          id: id,
+        },
+      })
+    )
+    .post(
+      "/hospitals",
+      async ({ body }) => {
+        if (body.gallery !== undefined) {
+          generateObjectIdForSubdocumentList(body.gallery);
+        }
+        return prisma.hospitals.create({ data: body });
+      },
+      {
+        body: CreateHospitalDTO,
+      }
+    )
+    .patch(
+      "/hospitals/:id",
+      async ({ params: { id }, body }) => {
+        if (body.gallery !== undefined) {
+          generateObjectIdForSubdocumentList(body.gallery);
+          // const existingGallery = (
+          //   await prisma.hospitals.findFirst({
+          //     select: {
+          //       gallery: true,
+          //     },
+          //     where: {
+          //       id: id,
+          //     },
+          //   })
+          // )?.gallery;
+
+          // if (existingGallery !== undefined) {
+          //   oldIds.concat(
+          //     existingGallery.map((item) => new ObjectId(item.id as string))
+          //   );
+          // }
+        }
+
+        return prisma.hospitals.update({
+          where: {
+            id: id,
+          },
+          data: body,
+        });
+      },
+
+      {
+        body: UpdateHospitalDTO,
+      }
+    )
+    .delete("/hospitals/:id", ({ params: { id } }) =>
+      prisma.hospitals.delete({ where: { id: id } })
+    );

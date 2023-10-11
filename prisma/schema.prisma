@@ -1,0 +1,253 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "mongodb"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model diseases {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  name            String   @unique
+  description     String?
+  scientific_name String
+  classification  String
+  severity        String
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  // @@map("diseases")
+}
+
+type UserInfo {
+  first_name   String
+  last_name    String
+  gender       String
+  dob          DateTime
+  home_address String
+  avatar       String?
+}
+
+// type Appointment {
+//   id       String?  @map("_id") @db.ObjectId
+//   user_id  String   @db.ObjectId
+//   begin_at DateTime
+//   end_at   DateTime
+// }
+
+model appointments {
+  id                      String   @id @default(auto()) @map("_id") @db.ObjectId
+  appointment_person      String   @db.ObjectId
+  person_to_meet          String   @db.ObjectId
+  begin_at                DateTime
+  end_at                  DateTime
+  appointment_person_info users?   @relation("appointment_person", fields: [appointment_person], references: [id])
+  person_to_meet_info     users?   @relation("person_to_meet", fields: [person_to_meet], references: [id])
+}
+
+type Notification {
+  id         String?  @map("_id") @db.ObjectId
+  title      String
+  message    String
+  type       String
+  created_at DateTime @default(now())
+}
+
+model users {
+  id             String         @id @default(auto()) @map("_id") @db.ObjectId
+  username       String         @unique
+  email          String         @unique
+  phone          String         @unique
+  info           UserInfo
+  notifications  Notification[]
+  created_at     DateTime       @default(now())
+  updated_at     DateTime       @updatedAt
+  appointments   appointments[] @relation("appointment_person")
+  people_to_meet appointments[] @relation("person_to_meet")
+  // @@map("users")
+  hospitals      hospitals[]
+  doctor         doctors?
+  patient        patients?
+  chat_senders   chats[]        @relation("chat_sender")
+  chat_receivers chats[]        @relation("chat_receiver")
+  session        sessions[]
+  key            keys[]
+}
+
+type ContactInfo {
+  website String? @default("https://examplewebsite.com")
+  phone   String? @default("0938656495")
+  email   String? @default("123abc@abc.com")
+  address String?
+}
+
+type Gallery {
+  id          String?  @map("_id") @db.ObjectId
+  name        String
+  description String?
+  file        String
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now())
+}
+
+type Location {
+  type        String
+  coordinates Float[]
+}
+
+model hospitals {
+  id            String       @id @default(auto()) @map("_id") @db.ObjectId
+  name          String       @unique
+  location      Location
+  director      String       @db.ObjectId
+  gallery       Gallery[]
+  capacity      Int
+  contact_info  ContactInfo?
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @updatedAt
+  director_info users?       @relation(fields: [director], references: [id])
+  // @@map("hospitals")
+  medicines     medicines[]
+}
+
+type WorkHistory {
+  id         String?   @map("_id") @db.ObjectId
+  hospital   String    @db.ObjectId
+  salary     Float
+  start_date DateTime
+  end_date   DateTime?
+  created_at DateTime  @default(now())
+  updated_at DateTime  @default(now())
+}
+
+type CertificateInfo {
+  id          String?   @map("_id") @db.ObjectId
+  issuer      String
+  validator   String
+  program     String
+  type        String
+  image       String
+  level       Int
+  issued_date DateTime
+  end_date    DateTime?
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @default(now())
+}
+
+model doctors {
+  id           String            @id @default(auto()) @map("_id") @db.ObjectId
+  npi          String            @unique
+  user_info    users?            @relation(fields: [user_id], references: [id])
+  speciality   specialities      @relation(fields: [speciality_id], references: [id])
+  gallery      Gallery[]
+  biography    String
+  work_history WorkHistory[]
+  certificates CertificateInfo[]
+  created_at   DateTime          @default(now())
+  updated_at   DateTime          @updatedAt
+
+  // @@map("doctors")
+  user_id       String @unique @db.ObjectId
+  speciality_id String @map("speciality") @db.ObjectId
+}
+
+type Prescription {
+  id         String?  @db.ObjectId
+  medicine   String   @db.ObjectId
+  quantity   Int
+  notes      String
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+}
+
+type DiseaseHistory {
+  id            String?        @db.ObjectId
+  name          String
+  diseases      String         @db.ObjectId
+  description   String?
+  photos        Gallery[]
+  examiner      String         @db.ObjectId
+  prescriptions Prescription[]
+  examined_at   DateTime
+  reexamine_at  DateTime?
+  created_at    DateTime       @default(now())
+  updated_at    DateTime       @default(now())
+}
+
+model patients {
+  id               String           @id @default(auto()) @map("_id") @db.ObjectId
+  user_info        users?           @relation(fields: [user_id], references: [id])
+  diseases_history DiseaseHistory[]
+  created_at       DateTime         @default(now())
+  updated_at       DateTime         @updatedAt
+  user_id          String           @unique @db.ObjectId
+}
+
+model medicines {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  brand       String
+  description String?
+  quantity    Int
+  price       Float
+  hospital    hospitals @relation(fields: [hospital_id], references: [id])
+  image       String?
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+
+  hospital_id String @map("hospital") @db.ObjectId
+}
+
+model specialities {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String?
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  doctors     doctors[]
+}
+
+type ChatMetadata {
+  reaction            String?
+  deleted_sender_only Boolean
+  deleted_everyone    Boolean
+  reply_to            String? @db.ObjectId
+}
+
+model chats {
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  receiver    users         @relation("chat_receiver", fields: [receiver_id], references: [id])
+  sender      users         @relation("chat_sender", fields: [sender_id], references: [id])
+  message     String
+  meta        ChatMetadata?
+  sent_at     DateTime      @default(now())
+  modified_at DateTime      @updatedAt
+
+  receiver_id String @map("sender") @db.ObjectId
+  sender_id   String @map("receiver") @db.ObjectId
+}
+
+//Lucia schemas
+model sessions {
+  id             String @id @map("_id")
+  user_id        String @db.ObjectId
+  active_expires BigInt
+  idle_expires   BigInt
+  user           users  @relation(references: [id], fields: [user_id], onDelete: Cascade)
+
+  @@index([user_id])
+}
+
+model keys {
+  id              String  @id @map("_id")
+  hashed_password String?
+  user_id         String  @db.ObjectId
+  user            users   @relation(references: [id], fields: [user_id], onDelete: Cascade)
+
+  @@index([user_id])
+}
